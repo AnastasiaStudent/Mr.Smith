@@ -1,0 +1,19 @@
+[{
+	"dienstname": "Facebook",
+	"url": "https://m.facebook.com/",
+	"logo": "../images/demo.jpeg",
+	"namefeld_identifikator": "name",
+	"namefeld": "email",
+	"passfeld_identifikator": "name",
+	"passfeld": "pass",
+	"user": "anastasiabaron@web.de"
+},{
+	"dienstname": "Relax",
+	"url": "https://relax.reutlingen-university.de",
+	"logo": "../images/demo.jpeg",
+	"namefeld_identifikator": "id",
+	"namefeld": "login_username",
+	"passfeld_identifikator": "id",
+	"passfeld": "login_password",
+	"user": "baron"
+}]

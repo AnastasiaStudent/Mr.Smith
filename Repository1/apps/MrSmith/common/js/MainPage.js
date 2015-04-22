@@ -20,6 +20,13 @@ currentPage.init = function(){
 currentPage.loadPage = function(pageName){
 	WL.Logger.debug("MainPage :: loadPage :: pageName: " + pageName);
 	pagesHistory.push(path + "pages/MainPage.html");
-	$("#pagePort").load(path + "pages/" + pageName + ".html");
+	$("#pagePort").load(path + "pages/" + pageName + ".html", function(){
+		$.getScript(path + "js/"+ pageName+".js", function() {
+			if (currentPage.init) {
+				currentPage.init();
+			}
+		});
+	});
 };
+
 

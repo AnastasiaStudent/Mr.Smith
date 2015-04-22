@@ -12,69 +12,111 @@
  */
 
 currentPage = {};
-//document.getElementById("fullList").style.visibility = "hidden";
-//document.addEventListener("deviceready", listeEinblenden, false);
+var list;
+var indexGlobal;
 currentPage.init = function() {
 	WL.Logger.debug("full :: init");
-	
+
+	$.getJSON("dienste.json", function(result) {
+		list=result;
+		$.each(result, function(i, field) {
+			$("#fullList").append(
+					'<a class="item item-avatar" href="#" onclick="currentPage.dienstladen('
+							+ "'" + i + "'" + ')"> <img src="'
+							+ field.logo + '"><h2>' + field.dienstname
+							+ '</h2> </a>');
+
+		});
+	});
+
+};
+
+currentPage.loadPage = function(pageName) {
+	WL.Logger.debug("full :: loadPage :: pageName: " + pageName);
+	pagesHistory.push(path + "pages/full.html");
+	$("#pagePort").load(path + "pages/" + pageName + ".html", function() {
+		$.getScript(path + "js/" + pageName + ".js", function() {
+			if (currentPage.init) {
+				currentPage.init();
+			}
+		});
+	});
+
 };
 
 currentPage.back = function() {
 	WL.Logger.debug("full :: back");
 	$("#pagePort").load(pagesHistory.pop());
 };
-currentPage.listeEinblenden=function (){
-	document.getElementById("fullList").style.visibility = "visible";
-	alert (document.getElementById("fullList").style.visibility);
-}
 
-currentPage.dienstladen = function(dienstName) {
-	WL.Logger.debug("full :: Dienstladen" + " - " + dienstName);
+currentPage.dienstladen = function(dienstNr) {
+	WL.Logger.debug("full :: Dienstladen" + " - " + dienstNr);
 	// Wait for device API libraries to load
-	//document.removeEventListener("deviceready", openInAppBrowser, false);
-	openInAppBrowser();
-	var InAppBrowserReference;
-	function openInAppBrowser() {
-		// Url wird abgerufen dienstname ist der Filterkriterium
-		var url = "http://m.facebook.de";
-		InAppBrowserReference = window.open(url, '_blank',
-				'location=no,toolbar=yes');
-		InAppBrowserReference.addEventListener('loaderror',
-				closeInAppBrowserErr);
-		InAppBrowserReference.addEventListener('loadstop', scriptEinfuegen);
-		InAppBrowserReference.addEventListener('exit', closeInAppBrowser);
+	//document.addEventListener("deviceready", openInAppBrowser(dienstName),false);
+	openInAppBrowser(dienstNr);
+};
+var InAppBrowserReference;
+function openInAppBrowser(index) {
+	indexGlobal=index;
+	var url = list[index].url;
+	InAppBrowserReference = window.open(url, '_blank',
+			'location=no,toolbar=yes');
+	InAppBrowserReference.addEventListener('loaderror', closeInAppBrowserErr);
+	InAppBrowserReference.addEventListener('loadstop', scriptEinfuegen);
+	InAppBrowserReference.addEventListener('exit', closeInAppBrowser);
+};
+function scriptEinfuegen() {
+	var feldEmail;
+	var feldPass;
+	var email;
+	var pass;
+	if(list[indexGlobal].namefeld_identifikator=="id"){
+		feldEmail = "document.getElementById("+"'"+list[indexGlobal].namefeld+"').value=";
 	}
-	function scriptEinfuegen() {
-		var feldEmail = "document.getElementsByName('email')[0].value=";// wird
-																		// abgerufen
-		var feldPass = "document.getElementsByName('pass')[0].value=";// wird
-																		// abgerufen
-		var email = "anastasiabaron@web.de";// wird abgerufen
-		var pass = "mrsmith2004";// wird berechnet
-		var codeText = feldEmail + "'" + email + "'; " + feldPass + "'" + pass
-				+ "'; ";
-		InAppBrowserReference.executeScript({
-			code : codeText
-		}, function() {
-			alert("Javascriptcode wurde erfolgreich hinzugefügt.");
-		});
+	else if (list[indexGlobal].namefeld_identifikator=="name"){
+		feldEmail = "document.getElementsByName('"+list[indexGlobal].namefeld+"')[0].value=";
 	}
-	function closeInAppBrowserErr(event) {
-		if (event.url.match("/close")) {
-			InAppBrowserReference.close();
-
-		}
-	}
-
-	function closeInAppBrowser(event) {
-	InAppBrowserReference.removeEventListener('loaderror',
-				closeInAppBrowserErr);
-		InAppBrowserReference.removeEventListener('loadstop',
-				replaceHeaderImage);
-		InAppBrowserReference.removeEventListener('exit', closeInAppBrowser);
-		InAppBrowserReference.close();
-		InAppBrowserReference=null;
+	else {
 		
 	}
-	;
+
+	if(list[indexGlobal].passfeld_identifikator=="id"){
+		feldPass = "document.getElementById("+"'"+list[indexGlobal].passfeld+"').value=";
+	}
+	else if (list[indexGlobal].namefeld_identifikator=="name"){
+		feldPass = "document.getElementsByName('"+list[indexGlobal].passfeld+"')[0].value=";
+	}
+	else {
+		
+	}
+	
+	email = list[indexGlobal].user;// To Do Mehrauswahl
+	
+	
+//	feldEmail = "document.getElementsByName('email')[0].value=";
+//feldPass = "document.getElementsByName('pass')[0].value=";
+
+pass = "mrsmith2004";// wird berechnet
+
+	var codeText = feldEmail + "'" + email + "'; " + feldPass + "'" + pass
+			+ "'; ";
+	InAppBrowserReference.executeScript({
+		code : codeText
+	}, function() {
+		alert("Javascriptcode wurde erfolgreich hinzugefügt.");
+	});
 };
+function closeInAppBrowserErr(event) {
+	if (event.url.match("/close")) {
+		InAppBrowserReference.close();
+	}
+};
+
+function closeInAppBrowser(event) {
+
+	InAppBrowserReference
+			.removeEventListener('loaderror', closeInAppBrowserErr);
+	InAppBrowserReference.removeEventListener('loadstop', scriptEinfuegen);
+	InAppBrowserReference.removeEventListener('exit', closeInAppBrowser);
+	InAppBrowserReference.close();
+}
